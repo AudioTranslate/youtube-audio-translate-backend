@@ -1,4 +1,10 @@
 .vscode
 venv
+__pycache__
 
 test.py
+gabage_test
+
+[MEDIA FILES]
+*.mp3
+*.m4a
