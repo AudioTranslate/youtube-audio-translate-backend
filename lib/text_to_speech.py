@@ -10,12 +10,26 @@ from google.cloud import texttospeech
 client = texttospeech.TextToSpeechClient()
 
 # Set the text input to be synthesized
-synthesis_input = texttospeech.SynthesisInput(text="Hello, World! my name is Fredrick nice to meet you all.")
+
+ssml_text = """<speak>
+  Here are <say-as interpret-as="characters">SSML</say-as> samples.
+  I can pause <break time="3s"/>.
+  I can play a sound
+  <audio src="https://www.example.com/MY_MP3_FILE.mp3">didn't get your MP3 audio file</audio>.
+  I can speak in cardinals. Your number is <say-as interpret-as="cardinal">10</say-as>.
+  Or I can speak in ordinals. You are <say-as interpret-as="ordinal">10</say-as> in line.
+  Or I can even speak in digits. The digits for ten are <say-as interpret-as="characters">10</say-as>.
+  I can also substitute phrases, like the <sub alias="World Wide Web Consortium">W3C</sub>.
+  Finally, I can speak a paragraph with two sentences.
+  <p><s>This is sentence one.</s><s>This is sentence two.</s></p>
+</speak>
+"""
+synthesis_input = texttospeech.SynthesisInput(ssml=ssml_text )
 
 # Build the voice request, select the language code ("en-US") and the ssml
 # voice gender ("neutral")
 voice = texttospeech.VoiceSelectionParams(
-    language_code="en-US", ssml_gender=texttospeech.SsmlVoiceGender.NEUTRAL
+    language_code="en-US", ssml_gender=texttospeech.SsmlVoiceGender.MALE
 )
 
 # Select the type of audio file you want returned
