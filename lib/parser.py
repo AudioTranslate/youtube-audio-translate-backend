@@ -1,6 +1,10 @@
 from abc import ABC, abstractmethod
 from re import L
-import stat
+import re
+from lib.exceptions import InvalidSSMLSyntax
+
+from utils.constants import CLOSE_TAG_PATTERN, ENCLOSED_TAG_PATTERN, INLINE_TAG_PATTERN, TAG_PATTERN, TEXT_PATTERN
+
 
 """
 SSML tags Implemented: text, break, speak, media, audio, seq, par, prosody
@@ -367,11 +371,15 @@ class Prosody(SSMLEncloseTag):
 
 
 
-
+tag_pattern_regex = re.compile(ENCLOSED_TAG_PATTERN)
+inline_tag_pattern_regex = re.compile(INLINE_TAG_PATTERN)
+text_pattern_regex = re.compile(TEXT_PATTERN)
+opened_tag_regex = re.compile(TAG_PATTERN)
 class SSMLTree:
 
     def __init__(self) -> None:
         self.__root = Speak(id='root', lang='en')
+        
 
     @property
     def root(self):
@@ -404,19 +412,113 @@ class SSMLTree:
 
     
     @staticmethod
-    def parse(smml_text):
-        pass
+    def get_text_index(text: str, substr: str, lastindex: int) -> float:
+        try:
+            index = text[lastindex:].find(substr)
+            return index
+        except TypeError:
+            return float('inf')
+
+    """
+    tgyufug dsd <s><s>iotu <aaaa /> <p>io </p> </s> </s> <P> HJKFUTYFGJH</p>WWWW
+    """
+
+    @staticmethod
+    def get_child_tags(text: str):
+        open_tag_idx = text.find('<')
+        opened_tags = []
+        opened_tags_attrib = []
+        child_tags = []
+        while open_tag_idx != -1:
+            close_open_tag_idx = text.find('>', open_tag_idx)
+            tag = text[open_tag_idx: close_open_tag_idx+1]
+            if inline_tag_pattern_regex.match(tag):
+                open_tag_idx = text.find('<', close_open_tag_idx)
+                continue
+            tag_name, attrib = opened_tag_regex.match(tag).groups()
+            opened_tags.append(tag_name)
+            opened_tags_attrib.append(attrib)
+            next_tag_idx = text.find('<', close_open_tag_idx)
+            if next_tag_idx == -1:
+                raise InvalidSSMLSyntax("Error unclosed tag")
+            close_next_tag_idx = -1
+            while len(opened_tags) != 0:
+                close_next_tag_idx = text.find('>', next_tag_idx)
+                if close_next_tag_idx == -1:
+                    raise InvalidSSMLSyntax("Tag not closed!")
+                next_tag = text[next_tag_idx: close_next_tag_idx+1]
+                close_tag = re.match(CLOSE_TAG_PATTERN,  next_tag)
+                opened_tag_match = opened_tag_regex.match(next_tag)
+                if close_tag is not None:
+                    tag_name = close_tag[1]
+                    if tag_name != opened_tags[-1]:
+                        raise InvalidSSMLSyntax(f"The last opened tag <{opened_tags[-1]} {opened_tags_attrib[-1]}> was not closed!")
+                    opened_tags.pop()
+                    opened_tags_attrib.pop()
+                elif opened_tag_match is not None:
+                    name, attrib = opened_tag_match.groups()
+                    opened_tags.append(name)
+                    opened_tags_attrib.append(attrib)
+
+                next_tag_idx = text.find('<', close_next_tag_idx)
+
+            child_tags.append((open_tag_idx, close_next_tag_idx+1))
+            open_tag_idx = text.find('<', close_next_tag_idx)
+        res = [text[i: j] for i,j in child_tags]
+        return res
+
+            
+
+    
+    @staticmethod
+    def parse(ssml_text: str):
+        try:
+            tag_match = tag_pattern_regex.match(ssml_text)
+            if tag_match:
+                if tag_match[0] != tag_match[-1]:
+                    raise InvalidSSMLSyntax(f"The tag {tag_match[0]} wasn't closed.")
+                attributes = tag_match[1]
+                body =  tag_match[2]
+
+                return
+            
+            text_tokens = text_pattern_regex.findall(ssml_text)
+            tag_tokens = tag_pattern_regex.findall(ssml_text)
+            inline_tokens = tag_pattern_regex.findall(ssml_text)
+
+            token_last_index = {}
+
+            ordered_children = []
+            tokens = [text_tokens, tag_tokens, inline_tokens]
+            while len(tokens[0]) or len(tokens[1]) or len(tokens[2]):
+                min_token_idx = None
+                min_token_pos = float('inf')
+                for i in range(len(tokens)):
+                    if len(tokens[i]) != 0:
+                        # text_idx = 2 if i == 1
+                        curr_token = tokens[i][0]
+                        lastindex = token_last_index.get(curr_token, 0)
+                        tag_pos = SSMLTree.get_text_index(ssml_text, curr_token, lastindex)
+                        token_last_index[curr_token] = tag_pos
+                        if tag_pos < min_token_pos:
+                            min_token_pos = tag_pos
+                            min_token_idx = i
+                token = tokens[min_token_idx].pop(0)
+                ordered_children.append(token.strip('\n'))
+                
+        except:
+            return None
 
 
 
         
-top = SSMLTree().root
-root = top.add_child(Par()).add_child(Media(begin='0s', id='audio_body'))
-# self.root = SSMLTag()
-root = root.add_child(Speak())
-root.add_child(Text("Hello, world!"))
-root.add_child(Text("Man damnm")).upper(inplace=True)
-root.add_child(Break(time="20s"))
+# top = SSMLTree().root
+# root = top.add_child(Par()).add_child(Media(begin='0s', id='audio_body'))
+# # self.root = SSMLTag()
+# root = root.add_child(Speak())
+# root.add_child(Text("Hello, world!"))
+# root.add_child(Text("Man damnm")).upper(inplace=True)
+# root.add_child(Break(time="20s"))
 
 
-print(str(top))
+# print(str(top))
