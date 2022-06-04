@@ -11,17 +11,15 @@ client = texttospeech.TextToSpeechClient()
 
 # Set the text input to be synthesized
 
-ssml_text = """<speak>
-  Here are <say-as interpret-as="characters">SSML</say-as> samples.
-  I can pause <break time="3s"/>.
-  I can play a sound
-  <audio src="https://www.example.com/MY_MP3_FILE.mp3">didn't get your MP3 audio file</audio>.
-  I can speak in cardinals. Your number is <say-as interpret-as="cardinal">10</say-as>.
-  Or I can speak in ordinals. You are <say-as interpret-as="ordinal">10</say-as> in line.
-  Or I can even speak in digits. The digits for ten are <say-as interpret-as="characters">10</say-as>.
-  I can also substitute phrases, like the <sub alias="World Wide Web Consortium">W3C</sub>.
-  Finally, I can speak a paragraph with two sentences.
-  <p><s>This is sentence one.</s><s>This is sentence two.</s></p>
+ssml_text = """
+<speak version="1.1" xmlns="http://www.w3.org/2001/10/synthesis"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.w3.org/2001/10/synthesis
+                 http://www.w3.org/TR/speech-synthesis11/synthesis.xsd"
+       xml:lang="en-US">
+  <prosody contour="(0%,+20Hz) (10%,+30%) (40%,+10Hz)">
+    good morning
+  </prosody>
 </speak>
 """
 synthesis_input = texttospeech.SynthesisInput(ssml=ssml_text )
