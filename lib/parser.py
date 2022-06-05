@@ -105,6 +105,10 @@ class SSMLEncloseTag(BaseTag):
         super().__init__(id=id, *args, **kwargs)
         self.child_ptr = None
 
+
+    def __str__(self) -> str:
+        return self.format_node('')
+
     def get_children(self):
         res = []
 
@@ -141,7 +145,7 @@ class SSMLEncloseTag(BaseTag):
         node.parent_node = self
         return node
 
-    def format_node(self, attrs) -> str:
+    def format_node(self, attrs: str) -> str:
         children_nodes = "".join([str(node) for node in self.get_children()])
         tag_name = self.__class__.__name__.lower()
         if attrs:
@@ -416,6 +420,21 @@ tag_pattern_regex = re.compile(ENCLOSED_TAG_PATTERN)
 inline_tag_pattern_regex = re.compile(INLINE_TAG_PATTERN)
 text_pattern_regex = re.compile(TEXT_PATTERN)
 opened_tag_regex = re.compile(TAG_PATTERN)
+
+
+class S(SSMLEncloseTag):
+
+    __allowed_children__ = [ Prosody, Text, Break, Par, Seq]
+
+    def __init__(self, id=None, *args, **kwargs) -> None:
+        super().__init__(id, *args, **kwargs)
+
+
+class P(SSMLEncloseTag):
+
+    __allowed_children__ = [S]
+    def __init__(self, id=None, *args, **kwargs) -> None:
+        super().__init__(id, *args, **kwargs)
 
 
 class SSMLTree:
