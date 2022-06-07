@@ -130,8 +130,8 @@ class SSMLEncloseTag(BaseTag):
         if self == node:
             raise ValueError("Can't add the object as it's child")
 
-        if node.parent_node == self:
-            raise ValueError("")
+        if node.parent_node is self:
+            raise ValueError(f"Can't add a node as it child, no circular references {self}")
 
         curr_node = self.child_ptr
         if curr_node is not None:
@@ -429,6 +429,16 @@ class S(SSMLEncloseTag):
     def __init__(self, id=None, *args, **kwargs) -> None:
         super().__init__(id, *args, **kwargs)
 
+    
+    def __str__(self) -> str:
+        attr_list = {
+            "xml:id": self.id,
+        }
+        attrs = " ".join(
+            [f'{attr}="{val}"' for attr, val in attr_list.items() if bool(val)]
+        )
+        return self.format_node(attrs)
+
 
 class P(SSMLEncloseTag):
 
@@ -436,6 +446,14 @@ class P(SSMLEncloseTag):
     def __init__(self, id=None, *args, **kwargs) -> None:
         super().__init__(id, *args, **kwargs)
 
+    def __str__(self) -> str:
+        attr_list = {
+            "xml:id": self.id,
+        }
+        attrs = " ".join(
+            [f'{attr}="{val}"' for attr, val in attr_list.items() if bool(val)]
+        )
+        return self.format_node(attrs)
 
 class SSMLTree:
 
@@ -450,6 +468,10 @@ class SSMLTree:
 
     def __init__(self) -> None:
         self.__root = Speak(id="root", lang="en")
+
+    
+    def __str__(self) -> str:
+        return str(self.__root)
 
     @property
     def root(self):
