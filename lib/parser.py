@@ -469,13 +469,15 @@ class SSMLTree:
     def __init__(self) -> None:
         self.__root = Speak(id="root", lang="en")
 
-    
     def __str__(self) -> str:
         return str(self.__root)
 
     @property
     def root(self):
         return self.__root
+
+    def add_child(self, node):
+        return self.__root.add_child(node)
 
     def find(self, tag):
         return NodeTraversal.find(self.__root, tag)

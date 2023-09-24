@@ -1,6 +1,6 @@
 .vscode
 venv
-__pycache__
+__pycache__ 
 
 test.py
 gabage_test
@@ -8,3 +8,6 @@ gabage_test
 [MEDIA FILES]
 *.mp3
 *.m4a
+*.wav
+*.zip
+*.vtt

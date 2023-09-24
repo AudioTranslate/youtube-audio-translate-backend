@@ -1,15 +1,16 @@
+import os
 from typing import Dict, List
 from unittest import result
 import requests
 import urllib.request
-import youtube_dl
+import yt_dlp
 
 
 class YouTubeData(object):
 
     def __init__(self, url) -> None:
         self.url = url
-        with youtube_dl.YoutubeDL() as ydl:
+        with yt_dlp.YoutubeDL() as ydl:
             download = ydl.extract_info(self.url, download=False)
         self.title = download['title']
         self.video_id = download['id']
@@ -23,7 +24,7 @@ class YouTubeData(object):
             'subtitleslangs': ['en', 'fr', 'ar'],
             'subtitlesformat': 'ttml'
             }
-        with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             meta = ydl.extract_info(self.url, download=False) 
             results = meta['automatic_captions']
         subs = meta.get('subtitles')
@@ -32,7 +33,7 @@ class YouTubeData(object):
                 results[lang] = subs[lang]
         return results
 
-    def get_subtitle(self, lang, format, save_to_file=False):
+    def get_subtitle(self, lang, format, save_to_file=False, filename=None):
         all_subs = self.list_all_subtitles()
         lang_subs = all_subs.get(lang, [])
         sub_url = None
@@ -44,19 +45,24 @@ class YouTubeData(object):
             return None
         response = requests.get(sub_url)
         data = response.text
+        if not filename:
+            filename = f'{self.title}-{self.video_id}.{format}'
         if save_to_file:
-            with open(f'{self.title}-{self.video_id}.{format}', 'w') as f:
+            with open(filename, 'w') as f:
                 f.write(data)
         return data
 
     def download_audio_track(self):
+        filename = f"{self.title}-{self.video_id}.wav"
         ydl_opts = {
             "format": "bestaudio/best"
         }
-        with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+        if os.path.exists(filename):
+            return filename
+
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             download = ydl.extract_info(self.url, download=False)
         
-        filename = f"{self.title}-{self.video_id}.m4a"
         urllib.request.urlretrieve(download['url'], filename)
         return filename
          

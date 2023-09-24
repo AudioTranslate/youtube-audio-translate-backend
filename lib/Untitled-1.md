@@ -1,0 +1,4 @@
+GET https://youtube.googleapis.com/youtube/v3/captions/nSiiPJ7h2adhrmrSqyyWIOk0N-C3uhJq9-p4uCktfrs=?key=AIzaSyA17IXottUc9CjY8W-z8rGQ-gHRVdOWTQg HTTP/1.1
+
+Authorization: Bearer ya29.c.b0AXv0zTPXoktkvmk_3gE4kt1LJcdRUQIa5xCNihjJI_QQqE09K6gr6JTzTYd5jazItm-g-A5-Iriwsel4DYNLxmSmj0My7dXlDaeHVNdcrXZuVCH5p1w-bvrvYV66xjlE7An9JwQL_Yxq6CZUEQa6seSmD0yGv0Te0Bb881Q6kWkp_pgetHnU_SqLppt4QYpyWjgf8BGli8NM86MGmiYEx1yXWOe1i6c
+Accept: application/json
